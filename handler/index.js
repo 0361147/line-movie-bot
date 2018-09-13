@@ -1,6 +1,7 @@
 const line = require('@line/bot-sdk');
 const clientCfg = require('../config');
 const messageHandler = require('./message');
+const postbackHandler = require('./postback');
 
 const client = new line.Client(clientCfg);
 
@@ -19,11 +20,7 @@ function handleEvent(event) {
       return console.log('some people unfollow this bot');
 
     case 'postback':
-      console.log('postback data', event.postback.data);
-      return client.replyMessage(event.replyToken, {
-        type: 'text',
-        text: 'it run post back',
-      });
+      return postbackHandler(client, event.replyToken, event.postback.data);
 
     case 'beacon':
       return client.replyMessage(event.replyToken, {

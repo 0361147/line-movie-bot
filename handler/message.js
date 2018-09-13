@@ -2,7 +2,7 @@ const axios = require('../axiosCfg');
 
 function handleMessage(client, replyToken, message) {
   console.log('text', message.text);
-  let query = message.text.split(' ');
+  let query = message.text.toLowerCase().split(' ');
   const req = query[0];
   console.log('req', req);
   query = query.slice(1).join(' ');
@@ -19,6 +19,9 @@ function handleMessage(client, replyToken, message) {
           },
         })
         .then(async ({ data: { results } }) => {
+          if (results.length === 0) {
+            throw new Error('Movie tidak di temukan');
+          }
           const columns = await results.slice(0, 9).map(v => ({
             imageUrl: `https://image.tmdb.org/t/p/w500${v.poster_path}`,
             action: {
@@ -27,7 +30,6 @@ function handleMessage(client, replyToken, message) {
               data: `detail ${v.id}`,
             },
           }));
-          console.log(columns);
           return client.replyMessage(replyToken, {
             type: 'template',
             altText: 'Movie list',
