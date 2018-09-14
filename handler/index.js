@@ -11,9 +11,30 @@ function handleEvent(event) {
       return messageHandler(client, event.replyToken, event.message);
 
     case 'follow':
+      client.getProfile(event.source.userId).then((profile) => {
+        client.replyMessage(event.replyToken, [
+          {
+            type: 'text',
+            text: `Terima kasih ${profile.displayName} karena telah menambahkan saya sebagai teman.
+
+Saya dapat membantu kamu untuk menemukan informasi dari movie yang ingin kamu cari yaitu dengan mengetik
+
+cari nama movie
+
+contoh:
+cari The Nun
+`,
+          },
+          {
+            type: 'text',
+            text:
+              'Karena keterbatasan saya, maka deskripsi dari movie akan di tampilkan dalam bahasa inggris',
+          },
+        ]);
+      });
       return client.replyMessage(event.replyToken, {
         type: 'text',
-        text: 'Thank You for follow this bot',
+        text: 'Terima kasih',
       });
 
     case 'unfollow':
