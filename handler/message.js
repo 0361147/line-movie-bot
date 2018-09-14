@@ -1,9 +1,19 @@
 const axios = require('../axiosCfg');
+const qr = require('./quickRespon');
 
 function handleMessage(client, replyToken, message) {
   let query = message.text.toLowerCase().split(' ');
   const req = query[0];
   query = query.slice(1).join(' ');
+
+  const createColums = results => results.slice(0, 9).map(v => ({
+    imageUrl: `https://image.tmdb.org/t/p/w500${v.poster_path}`,
+    action: {
+      label: 'View Detail',
+      type: 'postback',
+      data: `detail ${v.id}`,
+    },
+  }));
 
   switch (req) {
     case 'cari':
@@ -11,6 +21,7 @@ function handleMessage(client, replyToken, message) {
         return client.replyMessage(replyToken, {
           type: 'text',
           text: 'Tolong Masukan nama movie yang ingin di cari',
+          ...qr,
         });
       }
       return axios
@@ -24,14 +35,7 @@ function handleMessage(client, replyToken, message) {
           if (results.length === 0) {
             throw new Error('Movie tidak di temukan');
           }
-          const columns = await results.slice(0, 9).map(v => ({
-            imageUrl: `https://image.tmdb.org/t/p/w500${v.poster_path}`,
-            action: {
-              label: 'View Detail',
-              type: 'postback',
-              data: `detail ${v.id}`,
-            },
-          }));
+          const columns = await createColums(results);
           return client.replyMessage(replyToken, {
             type: 'template',
             altText: 'Movie list',
@@ -44,6 +48,7 @@ function handleMessage(client, replyToken, message) {
         .catch(() => client.replyMessage(replyToken, {
           type: 'text',
           text: 'Movie tidak di temukan',
+          ...qr,
         }));
 
     case 'trending':
@@ -53,14 +58,7 @@ function handleMessage(client, replyToken, message) {
           if (results.length === 0) {
             throw new Error('Tidak ada hot movie');
           }
-          const columns = await results.slice(0, 9).map(v => ({
-            imageUrl: `https://image.tmdb.org/t/p/w500${v.poster_path}`,
-            action: {
-              label: 'View Detail',
-              type: 'postback',
-              data: `detail ${v.id}`,
-            },
-          }));
+          const columns = await createColums(results);
           return client.replyMessage(replyToken, {
             type: 'template',
             altText: 'Movie list',
@@ -73,6 +71,7 @@ function handleMessage(client, replyToken, message) {
         .catch(() => client.replyMessage(replyToken, {
           type: 'text',
           text: 'Tidak bisa menampilkan hot movie',
+          ...qr,
         }));
 
     case 'recommend':
@@ -82,14 +81,7 @@ function handleMessage(client, replyToken, message) {
           if (results.length === 0) {
             throw new Error('Tidak rekomendasi movie');
           }
-          const columns = await results.slice(0, 9).map(v => ({
-            imageUrl: `https://image.tmdb.org/t/p/w500${v.poster_path}`,
-            action: {
-              label: 'View Detail',
-              type: 'postback',
-              data: `detail ${v.id}`,
-            },
-          }));
+          const columns = await createColums(results);
           return client.replyMessage(replyToken, {
             type: 'template',
             altText: 'Movie list',
@@ -102,6 +94,7 @@ function handleMessage(client, replyToken, message) {
         .catch(() => client.replyMessage(replyToken, {
           type: 'text',
           text: 'Tidak bisa menampilkan rekomendasi',
+          ...qr,
         }));
 
     case 'popular':
@@ -115,14 +108,7 @@ function handleMessage(client, replyToken, message) {
           if (results.length === 0) {
             throw new Error('Tidak ada movie populer');
           }
-          const columns = await results.slice(0, 9).map(v => ({
-            imageUrl: `https://image.tmdb.org/t/p/w500${v.poster_path}`,
-            action: {
-              label: 'View Detail',
-              type: 'postback',
-              data: `detail ${v.id}`,
-            },
-          }));
+          const columns = await createColums(results);
           return client.replyMessage(replyToken, {
             type: 'template',
             altText: 'Movie list',
@@ -135,6 +121,7 @@ function handleMessage(client, replyToken, message) {
         .catch(() => client.replyMessage(replyToken, {
           type: 'text',
           text: 'Tidak bisa menampilkan movie popular',
+          ...qr,
         }));
 
     case 'upcoming': {
@@ -161,14 +148,7 @@ function handleMessage(client, replyToken, message) {
             throw new Error('Tidak ada movie populer');
           }
 
-          const columns = await results.map(v => ({
-            imageUrl: `https://image.tmdb.org/t/p/w500${v.poster_path}`,
-            action: {
-              label: 'View Detail',
-              type: 'postback',
-              data: `detail ${v.id}`,
-            },
-          }));
+          const columns = await createColums(results);
           return client.replyMessage(replyToken, {
             type: 'template',
             altText: 'Movie list',
@@ -181,13 +161,15 @@ function handleMessage(client, replyToken, message) {
         .catch(() => client.replyMessage(replyToken, {
           type: 'text',
           text: 'Tidak dapat melihat upcoming movie',
+          ...qr,
         }));
     }
 
     default:
       return client.replyMessage(replyToken, {
         type: 'text',
-        text: 'default berjalan',
+        text: 'Saya tidak dapat melakukan perintah tersebut',
+        ...qr,
       });
   }
 }

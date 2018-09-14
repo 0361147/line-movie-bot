@@ -2,6 +2,7 @@ const line = require('@line/bot-sdk');
 const clientCfg = require('../config');
 const messageHandler = require('./message');
 const postbackHandler = require('./postback');
+const qr = require('./quickRespon');
 
 const client = new line.Client(clientCfg);
 
@@ -11,11 +12,14 @@ function handleEvent(event) {
       return messageHandler(client, event.replyToken, event.message);
 
     case 'follow':
-      client.getProfile(event.source.userId).then((profile) => {
-        client.replyMessage(event.replyToken, [
+      return client
+        .getProfile(event.source.userId)
+        .then(profile => client.replyMessage(event.replyToken, [
           {
             type: 'text',
-            text: `Terima kasih ${profile.displayName} karena telah menambahkan saya sebagai teman.
+            text: `Terima kasih ${
+              profile.displayName
+            } karena telah menambahkan saya sebagai teman.
 
 Saya dapat membantu kamu untuk menemukan informasi dari movie yang ingin kamu cari yaitu dengan mengetik
 
@@ -28,14 +32,30 @@ cari The Nun
           {
             type: 'text',
             text:
-              'Karena keterbatasan saya, maka deskripsi dari movie akan di tampilkan dalam bahasa inggris',
+                'Karena keterbatasan saya, maka deskripsi dari movie akan di tampilkan dalam bahasa inggris',
+            ...qr,
           },
-        ]);
-      });
-      return client.replyMessage(event.replyToken, {
-        type: 'text',
-        text: 'Terima kasih',
-      });
+        ]))
+        .catch(() => client.replyMessage(event.replyToken, [
+          {
+            type: 'text',
+            text: `Terima kasih karena telah menambahkan saya sebagai teman.
+
+Saya dapat membantu kamu untuk menemukan informasi dari movie yang ingin kamu cari yaitu dengan mengetik
+
+cari nama movie
+
+contoh:
+cari The Nun
+`,
+          },
+          {
+            type: 'text',
+            text:
+                'Karena keterbatasan saya, maka deskripsi dari movie akan di tampilkan dalam bahasa inggris',
+            ...qr,
+          },
+        ]));
 
     case 'unfollow':
       return console.log('some people unfollow this bot');

@@ -1,4 +1,5 @@
 const axios = require('../axiosCfg');
+const qr = require('./quickRespon');
 
 function handlePostback(client, replyToken, message) {
   const [req, param] = message.split(' ');
@@ -39,18 +40,21 @@ function handlePostback(client, replyToken, message) {
 
 ${overview}
           `,
+              ...qr,
             },
           ]);
         })
         .catch(() => client.replyMessage(replyToken, {
           type: 'text',
           text: 'Detail movie tidak ditemukan',
+          ...qr,
         }));
 
     default:
       return client.replyMessage(replyToken, {
         type: 'text',
         text: 'default postback berjalan',
+        ...qr,
       });
   }
 }
